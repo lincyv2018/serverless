@@ -1,0 +1,62 @@
+// step function 
+
+{
+    "Comment": "Alamy image Upload.",
+    "StartAt": "image_res_check",
+    "States": {
+      "image_res_check": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:image_res_check",
+        "Next": "image_process"
+      },
+      "image_process": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:image_process",
+        "Next": "s3_push"
+      },
+       "s3_push": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:s3_push",
+        "Next": "ChoiceState"
+      },
+      
+      "ChoiceState": {
+        "Type" : "Choice",
+        "Choices": [
+          {
+            "Variable": "$.foo",
+            "NumericEquals": 1,
+            "Next": "upload_to_s3"
+          },
+          {
+            "Variable": "$.foo",
+            "NumericEquals": 1,
+            "Next": "thumpnail_creation"
+          }   
+        ]
+    },
+  
+      "upload_to_s3": {
+        "Type" : "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:upload_to_s3",
+        "Next": "post_server"
+      },
+      "post_server": {
+        "Type" : "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:post_server",
+        "Next": "notify"
+      },      
+  
+      "thumpnail_creation": {
+        "Type" : "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:thumpnail_creation",
+        "Next": "notify"
+      },
+  
+      "notify": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:notify",
+        "End": true
+      }
+    }
+}
